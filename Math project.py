@@ -4,31 +4,55 @@ from matplotlib import pyplot
 power_x_axis=[]
 Midpoint_ratio_y_axis=[]
 
-def values(partitions, start, end):
+def calculate_midpoint_x_values(partitions, start, end):
     """
     Calculates the x values for the midpoint and trapezoidal sums
     :param partitions: The number of partitions of the function
     :param start: The starting value of the integral
     :param end: The end value of the integral
-    :return: midpointx- the x values of the midpoint sum and trapezoidx- the x values of the trapezoidal sum
+    :return: a list of the x values of the midpoint sum
     """
     midpointx=[]
-    trapazoidx=[]
-    for x in range(partitions):
-        midpointx.append((end-start)/(2*partitions)+((end-start)/partitions)*x)
-    for x in range(2*partitions):
-        trapazoidx.append(((end-start)/(2*partitions))*x)
-    trapazoidx.append(end)
-    return midpointx, trapazoidx
+    for i in range(partitions):
+        midpointx.append((end-start)/(2*partitions)+((end-start)/partitions)*i)
+    return midpointx
 
-def fx(power, lst):
+def calculate_trapezoid_x_values(partitions, start, end):
+    """
+       Calculates the x values for the midpoint and trapezoidal sums
+       :param partitions: The number of partitions of the function
+       :param start: The starting value of the integral
+       :param end: The end value of the integral
+       :return: a list of the x values of the trapezoidal sum
+       """
+    trapazoidx=[]
+    for i in range(2*partitions):
+        trapazoidx.append(((end-start)/(2*partitions))*i)
+    trapazoidx.append(end)
+    return trapazoidx
+
+def calculate_y_values(power, xvalues):
+    """
+    Calculates the y values of the function
+    :param power: The power x is being raised to
+    :param lst: the list of x values
+    :return: a list of y values of the function
+    """
     values=[]
-    for x in lst:
+    for x in xvalues:
         values.append(x**power)
     return values
-def midpoint(lst, partition):
-    tally=sum(lst)
+
+def midpoint(yvalues, partition):
+    """
+    Calculates the midpoint approximation of the function
+    :param yvalues: A list of the midpoint y values
+    :param partition: the number of partitions used
+    :return: the midpoint approximation of the function
+    """
+    tally=sum(yvalues)
     return tally*partition
+
 def trapazoid(lst, partion, s, e):
     end=len(lst)-1
     tally=sum(lst[1:end])
@@ -48,9 +72,11 @@ def main(power):
     partitions=8
     start=0
     end=4
-    mid, trap=values(partitions, start, end)
-    midval=fx(power, mid)
-    trapval=fx(power, trap)
+    mid=calculate_midpoint_x_values(partitions, start, end)
+    trap=calculate_trapezoid_x_values(partitions, start, end)
+
+    midval=calculate_y_values(power, mid)
+    trapval=calculate_y_values(power, trap)
     print("midponts: ", mid,"\n", "midpoint ys: ", midval,"\n", "trapezoid points:", trap,"\n", "trpezoid ys: ", trapval, sep="")
     A=midpoint(midval, (end-start)/partitions)
     B=trapazoid(trapval, 2*partitions,start, end)

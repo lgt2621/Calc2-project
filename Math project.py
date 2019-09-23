@@ -98,8 +98,8 @@ def make_graph(xaxis, yaxis):
     :return: NULL
     """
     pyplot.plot(xaxis, yaxis)
-    pyplot.title('Extended Graph')
-    pyplot.ylabel('Amplitude')
+    pyplot.title('Ratio Graph')
+    pyplot.ylabel('Midpoint Ratio')
     pyplot.xlabel('Power of X')
     pyplot.savefig("CalcGraph1.png")
 
@@ -118,20 +118,19 @@ def main():
     midpointXs=calculate_midpoint_x_values(partitions, start, end)
     trapezoidXs=calculate_trapezoid_x_values(partitions, start, end)
 
-    for exponent in range(2,power+1):
-        print("power: x^", power,sep="")
-        midpointYs=calculate_y_values(power, midpointXs)
-        trapezoidYs=calculate_y_values(power, trapezoidXs)
-        print("midpont Xs:", midpointXs,"\n", "midpoint Ys:", midpointYs,"\n",
-              "trapezoid Xs:", trapezoidXs,"\n", "trpezoid Ys:", trapezoidYs)
+    for exponent in range(2, power+1):
+        print("power: x^", exponent,sep="")
+        midpointYs=calculate_y_values(exponent, midpointXs)
+        trapezoidYs=calculate_y_values(exponent, trapezoidXs)
+        print("midpont Xs:", midpointXs,"\nmidpoint Ys:", midpointYs,"\ntrapezoid Xs:", trapezoidXs,
+              "\ntrpezoid Ys:", trapezoidYs)
         midpoint_appox=midpoint_sum(midpointYs, (end - start) / partitions)
         trapezoid_approx=trapazoid_sum(trapezoidYs, 2 * partitions, start, end)
-        print("midpoint approximation:", midpoint_appox,"\n",
-              "Trapezoid approximation:", trapezoid_approx)
-        actual=integral(start, end, power)
+        print("midpoint approximation:", midpoint_appox,"\nTrapezoid approximation:", trapezoid_approx)
+        actual=integral(start, end, exponent)
         print("actual: ", actual)
         trapezoid_ratio, midpoint_ratio=ratio(midpoint_appox, trapezoid_approx, actual)
-        power_x_axis.append(power)
+        power_x_axis.append(exponent)
         Midpoint_ratio_y_axis.append(midpoint_ratio)
         print(actual,"=", midpoint_ratio, "Midpoint", "+", trapezoid_ratio, "Trapezoid")
 

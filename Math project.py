@@ -1,8 +1,6 @@
 from scipy.integrate import quad
 from matplotlib import pyplot
 
-power_x_axis=[]
-Midpoint_ratio_y_axis=[]
 
 def calculate_midpoint_x_values(partitions, start, end):
     """
@@ -43,56 +41,103 @@ def calculate_y_values(power, xvalues):
         values.append(x**power)
     return values
 
-def midpoint(yvalues, partition):
+def midpoint_sum(yvalues, partition):
     """
     Calculates the midpoint approximation of the function
     :param yvalues: A list of the midpoint y values
-    :param partition: the number of partitions used
+    :param partition: the lenght of the partitions used
     :return: the midpoint approximation of the function
     """
     tally=sum(yvalues)
     return tally*partition
 
-def trapazoid(lst, partion, s, e):
-    end=len(lst)-1
-    tally=sum(lst[1:end])
-    tally=(tally*2)+lst[end]
-    return tally*((e-s)/(partion*2))
-def inter(start, end, power):
-    xp= lambda x: x**power  # x**power
-    ans, err=quad(xp, start, end)
-    return ans
-def ratio(M, T, act):
-    y=act-M
-    r=T-M
-    x=y/r
-    return x, 1-x
-def main(power):
-    print("power: x^",power,sep="")
-    partitions=8
-    start=0
-    end=4
-    mid=calculate_midpoint_x_values(partitions, start, end)
-    trap=calculate_trapezoid_x_values(partitions, start, end)
+def trapazoid_sum(yvalues, partition, start, end):
+    """
+    Calculates the trapezoidal approximation of the function
+    :param yvalues: List of the y values
+    :param partition: the lenght of the partitions in the approximation
+    :param start: the start value of the integral
+    :param end: the end value of the integral
+    :return: the trapezoidal approximation
+    """
+    end_index=len(yvalues) - 1
+    tally=sum(yvalues[1:end_index])
+    tally=(tally*2)+yvalues[end_index]
+    return tally*((end-start)/(partition*2))
 
-    midval=calculate_y_values(power, mid)
-    trapval=calculate_y_values(power, trap)
-    print("midponts: ", mid,"\n", "midpoint ys: ", midval,"\n", "trapezoid points:", trap,"\n", "trpezoid ys: ", trapval, sep="")
-    A=midpoint(midval, (end-start)/partitions)
-    B=trapazoid(trapval, 2*partitions,start, end)
-    print("midpoint: ", A,"\n", "Trapezoid: ", B, sep="")
-    act=inter(start, end, power)
-    print("actual: ", act)
-    trat, mrat=ratio(A, B, act)
-    power_x_axis.append(power)
-    Midpoint_ratio_y_axis.append(mrat)
-    print(act," = ", mrat," Midpoint ", "+ ", trat, " Trapezoid", sep="")
-for i in range(2, 3):
-    main(i)
-print(power_x_axis, "\n", Midpoint_ratio_y_axis)
+def integral(start, end, power):
+    """
+    Calculates the integral of the function
+    :param start: the start value of the integral
+    :param end: the end vale of the integral
+    :param power:
+    :return: the value of the integral from start to end
+    """
+    xprime=lambda x: x**power
+    answer, error=quad(xprime, start, end)
+    return answer
 
-pyplot.plot(power_x_axis, Midpoint_ratio_y_axis)
-pyplot.title('Extended Graph')
-pyplot.ylabel('Amplitude')
-pyplot.xlabel('Power of X')
-pyplot.savefig("CalcGraph1.png")
+def ratio(midpoint, trapezoid, actual):
+    """
+    Calculates the ratio of midpoint to trapezoid approximation to get the actual value of the integral
+    :param midpoint: the midpoint approximation
+    :param trapezoid: the trapezoidal approximation
+    :param actual: the actual integral value
+    :return: the ratios of the midpoint and trapezoidal sums needed to get the actual integral value
+    """
+    midpoint_error=actual-midpoint
+    trapezoid_error=trapezoid-midpoint
+    MvT_ratio=midpoint_error/trapezoid_error
+    return MvT_ratio, 1-MvT_ratio
+
+def make_graph(xaxis, yaxis):
+    """
+    Creates a graph of the data
+    :param xaxis: The values for the x axis
+    :param yaxis: The values for the y axis
+    :return: NULL
+    """
+    pyplot.plot(xaxis, yaxis)
+    pyplot.title('Extended Graph')
+    pyplot.ylabel('Amplitude')
+    pyplot.xlabel('Power of X')
+    pyplot.savefig("CalcGraph1.png")
+
+def main():
+    """
+    Takes in user input for thr valus and loops over all the specified functions then graphs the data
+    :return: NULL
+    """
+    partitions=int(input("Enter the number of partitions: "))
+    start=int(input("Enter the start value of the integral: "))
+    end=int(input("Enter the end value of the integral: "))
+    power=int(input("Enter the power of x to calculate to: "))
+
+    power_x_axis=[]
+    Midpoint_ratio_y_axis=[]
+    midpointXs=calculate_midpoint_x_values(partitions, start, end)
+    trapezoidXs=calculate_trapezoid_x_values(partitions, start, end)
+
+    for exponent in range(2,power+1):
+        print("power: x^", power,sep="")
+        midpointYs=calculate_y_values(power, midpointXs)
+        trapezoidYs=calculate_y_values(power, trapezoidXs)
+        print("midpont Xs:", midpointXs,"\n", "midpoint Ys:", midpointYs,"\n",
+              "trapezoid Xs:", trapezoidXs,"\n", "trpezoid Ys:", trapezoidYs)
+        midpoint_appox=midpoint_sum(midpointYs, (end - start) / partitions)
+        trapezoid_approx=trapazoid_sum(trapezoidYs, 2 * partitions, start, end)
+        print("midpoint approximation:", midpoint_appox,"\n",
+              "Trapezoid approximation:", trapezoid_approx)
+        actual=integral(start, end, power)
+        print("actual: ", actual)
+        trapezoid_ratio, midpoint_ratio=ratio(midpoint_appox, trapezoid_approx, actual)
+        power_x_axis.append(power)
+        Midpoint_ratio_y_axis.append(midpoint_ratio)
+        print(actual,"=", midpoint_ratio, "Midpoint", "+", trapezoid_ratio, "Trapezoid")
+
+    make_graph(power_x_axis, Midpoint_ratio_y_axis)
+
+if __name__ == '__main__':
+    main()
+
+
